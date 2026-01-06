@@ -1,0 +1,1055 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HARBR Tagesabschluss</title>
+
+  <!-- ✅ XLSX com suporte a estilos -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
+  <style>
+    :root{
+      --bg:#0B1320;
+      --surface:#111C2E;
+      --surface2:#0F1A2B;
+      --text:#E8EEF9;
+      --muted:#94A3B8;
+      --accent:#2DD4BF;
+      --danger:#FB7185;
+      --ok:#34D399;
+
+      --radius:16px;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --border: 1px solid rgba(148,163,184,.18);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 10% 0%, rgba(45,212,191,.14), transparent 60%),
+                  radial-gradient(900px 500px at 95% 10%, rgba(251,113,133,.10), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+    }
+
+    .wrap{
+      max-width: 1120px;
+      margin: 28px auto 60px;
+      padding: 0 18px;
+    }
+
+    header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom: 18px;
+    }
+
+    .brand{
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .brand .title{
+      font-size: 22px;
+      letter-spacing: .2px;
+      font-weight: 750;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .pill{
+      font-size: 12px;
+      color: rgba(232,238,249,.9);
+      background: rgba(45,212,191,.12);
+      border: 1px solid rgba(45,212,191,.25);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+    .subtitle{
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.35;
+      max-width: 720px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(17,28,46,.92), rgba(15,26,43,.90));
+      border: var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .card h2{
+      margin:0 0 10px;
+      font-size: 14px;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      color: rgba(232,238,249,.86);
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 620px){
+      .row{ grid-template-columns: 1fr; }
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+    }
+    label{
+      font-size: 12px;
+      color: var(--muted);
+    }
+    input[type="file"], select{
+      width:100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(148,163,184,.22);
+      background: rgba(11,19,32,.35);
+      color: var(--text);
+      outline: none;
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      margin-top: 12px;
+      align-items:center;
+    }
+
+    button{
+      border: none;
+      cursor: pointer;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(45,212,191,.14);
+      color: var(--text);
+      border: 1px solid rgba(45,212,191,.30);
+      font-weight: 650;
+    }
+    button.secondary{
+      background: rgba(148,163,184,.10);
+      border: 1px solid rgba(148,163,184,.25);
+      font-weight: 600;
+      color: rgba(232,238,249,.92);
+    }
+    button.danger{
+      background: rgba(251,113,133,.12);
+      border: 1px solid rgba(251,113,133,.32);
+    }
+    button:disabled{
+      opacity:.55; cursor:not-allowed;
+    }
+
+    table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 14px;
+      border: 1px solid rgba(148,163,184,.18);
+      background: rgba(11,19,32,.22);
+    }
+    th, td{
+      padding: 11px 10px;
+      border-bottom: 1px solid rgba(148,163,184,.14);
+      font-size: 13.5px;
+    }
+    th{
+      text-align:left;
+      font-size: 12px;
+      letter-spacing: .35px;
+      text-transform: uppercase;
+      color: rgba(232,238,249,.75);
+      background: rgba(148,163,184,.06);
+    }
+    td.num{ text-align:right; font-variant-numeric: tabular-nums; }
+    tr:last-child td{ border-bottom:none; }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,.22);
+      background: rgba(148,163,184,.08);
+      font-size: 12.5px;
+      color: rgba(232,238,249,.9);
+    }
+    .dot{
+      width:8px; height:8px; border-radius:999px; background: var(--accent);
+    }
+
+    .status-ok .dot{ background: var(--ok); }
+    .status-danger .dot{ background: var(--danger); }
+
+    .split{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom: 10px;
+    }
+
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12.5px;
+      color: rgba(232,238,249,.92);
+      background: rgba(11,19,32,.35);
+      border: 1px solid rgba(148,163,184,.22);
+      padding: 10px 12px;
+      border-radius: 12px;
+      white-space: pre-wrap;
+    }
+
+    .mini{
+      font-size: 12px;
+      color: rgba(148,163,184,.95);
+    }
+
+    .attach-card{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px;
+      border-radius:14px;
+      border: 1px solid rgba(148,163,184,.18);
+      background: rgba(148,163,184,.06);
+      margin-bottom:10px;
+    }
+    .attach-left{
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+      min-width: 0;
+    }
+    .attach-name{
+      font-weight:750;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .attach-meta{
+      font-size:12px;
+      color: rgba(148,163,184,.95);
+    }
+    .attach-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .preview-box{
+      margin-top:10px;
+      border-radius:14px;
+      border: 1px solid rgba(148,163,184,.18);
+      background: rgba(11,19,32,.25);
+      overflow:auto;
+      max-height: 260px;
+    }
+    .preview-box table{
+      border:none;
+      border-radius:0;
+      background: transparent;
+    }
+    .preview-box th, .preview-box td{
+      border-bottom: 1px solid rgba(148,163,184,.12);
+      font-size: 12.5px;
+      padding: 8px 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="title">
+          HARBR. Tagesabschluss
+          <span class="pill">Konstanz</span>
+        </div>
+        <div class="subtitle">
+        </div>
+      </div>
+      <div class="badge" id="statusBadge">
+        <span class="dot"></span>
+        <span id="statusText">Bereit</span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Dateien</h2>
+
+        <div class="row">
+          <div class="field">
+            <label>Payment Planet (.xlsx)</label>
+            <input type="file" id="filePayment" accept=".xlsx,.xls" />
+          </div>
+          <div class="field">
+            <label>Till Movement’s (.xlsx)</label>
+            <input type="file" id="fileTill" accept=".xlsx,.xls" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <div class="field">
+            <label>Sheet wählen (Payment Planet)</label>
+            <select id="sheetPayment" disabled></select>
+          </div>
+          <div class="field">
+            <label>Sheet wählen (Till Movement’s)</label>
+            <select id="sheetTill" disabled></select>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <h2>Anhänge</h2>
+          <div class="mini" style="margin-bottom:10px;">
+            Entfernen / Vorschau (Tabellenansicht).
+          </div>
+          <div id="attachmentsArea"></div>
+        </div>
+
+        <div class="actions">
+          <button id="btnCompare" disabled>Vergleichen</button>
+          <button id="btnDownloadExcel" class="secondary" disabled>Excel (editierbar) herunterladen</button>
+          <button id="btnCreateEmail" class="danger" disabled>E-Mail erstellen</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="split">
+          <h2 style="margin:0;">Vergleich</h2>
+          <div class="mini">Differenz = <b>Till − Payment</b></div>
+        </div>
+
+        <div id="tableArea"></div>
+
+        <div style="margin-top:14px;">
+          <h2>E-Mail Vorschau</h2>
+          <div class="actions" style="margin-top:0;">
+            <button id="btnOpenMailto" class="secondary" disabled>E-Mail öffnen</button>
+          </div>
+
+          <div class="mono" id="emailPreview" style="margin-top:10px; min-height: 120px;">
+Noch keine E-Mail erstellt.
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const BRANDS = [
+    { key: "mastercard", label: "Mastercard" },
+    { key: "visa", label: "Visa" },
+    { key: "maestro", label: "Maestro" },
+    { key: "amex", label: "American Express" },
+    { key: "visapay", label: "Visa Pay" },
+  ];
+
+  const els = {
+    filePayment: document.getElementById("filePayment"),
+    fileTill: document.getElementById("fileTill"),
+    sheetPayment: document.getElementById("sheetPayment"),
+    sheetTill: document.getElementById("sheetTill"),
+    btnCompare: document.getElementById("btnCompare"),
+    btnDownloadExcel: document.getElementById("btnDownloadExcel"),
+    btnCreateEmail: document.getElementById("btnCreateEmail"),
+    btnOpenMailto: document.getElementById("btnOpenMailto"),
+    tableArea: document.getElementById("tableArea"),
+    emailPreview: document.getElementById("emailPreview"),
+    statusBadge: document.getElementById("statusBadge"),
+    statusText: document.getElementById("statusText"),
+    attachmentsArea: document.getElementById("attachmentsArea"),
+  };
+
+  let wbPayment = null;
+  let wbTill = null;
+  let lastComparison = null;
+
+  const setStatus = (type, text) => {
+    els.statusBadge.classList.remove("status-ok", "status-danger");
+    if (type === "ok") els.statusBadge.classList.add("status-ok");
+    if (type === "danger") els.statusBadge.classList.add("status-danger");
+    els.statusText.textContent = text;
+  };
+
+  const fmtEUR = (n) => {
+    const val = Number(n || 0);
+    return val.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  const parseNumberLoose = (v) => {
+    if (v == null) return null;
+    if (typeof v === "number") return v;
+    const s = String(v).trim();
+    if (!s) return null;
+
+    let normalized = s.replace(/[^\d,.\-]/g, "");
+    const hasComma = normalized.includes(",");
+    const hasDot = normalized.includes(".");
+
+    if (hasComma && hasDot) normalized = normalized.replace(/\./g, "").replace(",", ".");
+    else if (hasComma && !hasDot) normalized = normalized.replace(",", ".");
+
+    const num = Number(normalized);
+    return Number.isFinite(num) ? num : null;
+  };
+
+  const getYesterdayDE = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    return `${dd}.${mm}.${yyyy}`;
+  };
+
+  const sheetToMatrix = (sheet) => XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: "" });
+
+  const readCell = (sheet, addr) => {
+    try {
+      const cell = sheet[addr];
+      return cell ? cell.v : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const getSheetByNameOrFallback = (wb, preferredName, fallbackSelectEl) => {
+    if (!wb) return null;
+    if (preferredName && wb.Sheets[preferredName]) return wb.Sheets[preferredName];
+    const chosen = fallbackSelectEl?.value || wb.SheetNames[0];
+    return wb.Sheets[chosen];
+  };
+
+  // ✅ pick Amount under EUR; if multiple EUR Amount columns exist, pick RIGHTMOST
+  const detectPaymentAmountColLetter = (sheet) => {
+    const m = sheetToMatrix(sheet);
+    const maxRows = Math.min(120, m.length);
+    const norm = (x) => String(x ?? "").trim().toLowerCase();
+
+    const currencyLabels = new Set(["eur", "chf", "usd", "gbp"]);
+    const amountCandidates = [];
+
+    for (let r = 0; r < maxRows; r++) {
+      const row = m[r] || [];
+      for (let c = 0; c < row.length; c++) {
+        if (norm(row[c]) !== "amount") continue;
+
+        let currency = null;
+        for (let up = r - 1; up >= Math.max(0, r - 25); up--) {
+          const v = norm((m[up] || [])[c]);
+          if (!v) continue;
+          if (currencyLabels.has(v)) { currency = v; break; }
+          if (v.includes("eur")) { currency = "eur"; break; }
+          if (v.includes("chf")) { currency = "chf"; break; }
+        }
+
+        amountCandidates.push({ col: c, row: r, currency });
+      }
+    }
+
+    const eurAmounts = amountCandidates.filter(x => x.currency === "eur");
+    if (eurAmounts.length > 0) {
+      const chosen = eurAmounts.reduce((best, cur) => (cur.col > best.col ? cur : best));
+      return XLSX.utils.encode_col(chosen.col);
+    }
+
+    return "H";
+  };
+
+  const paymentPlanetTotalsFixed = (sheet) => {
+    const totals = { mastercard: 0, visa: 0, maestro: 0, amex: 0, visapay: 0 };
+
+    const codeMap = {
+      "AX": "amex",
+      "MA": "maestro",
+      "MC": "mastercard",
+      "VP": "visapay",
+      "VS": "visa",
+    };
+
+    const ref = sheet["!ref"];
+    if (!ref) return totals;
+
+    const range = XLSX.utils.decode_range(ref);
+    const lastRow = range.e.r + 1;
+
+    const amountCol = detectPaymentAmountColLetter(sheet);
+
+    const getD = (r) => String(readCell(sheet, `D${r}`) ?? "").trim().toUpperCase();
+    const getAmount = (r) => parseNumberLoose(readCell(sheet, `${amountCol}${r}`));
+
+    const extractCode = (text) => {
+      const t = String(text ?? "").toUpperCase();
+      const m = t.match(/\b(AX|MA|MC|VP|VS)\b/);
+      return m ? m[1] : null;
+    };
+
+    for (let r = 1; r <= lastRow; r++) {
+      const dRaw = getD(r);
+      if (!dRaw) continue;
+      if (/^\d{10}$/.test(dRaw)) continue;
+
+      const code = extractCode(dRaw);
+      if (!code) continue;
+
+      const key = codeMap[code];
+      if (!key) continue;
+
+      let num = getAmount(r);
+      if (num == null && r + 1 <= lastRow) {
+        const nextD = getD(r + 1);
+        if (/^\d{10}$/.test(nextD)) {
+          num = getAmount(r + 1);
+        }
+      }
+
+      if (num == null) continue;
+      totals[key] += num;
+    }
+
+    return totals;
+  };
+
+  const tillMovementsTotalsFixed = (sheet) => {
+    const totals = { mastercard: 0, visa: 0, maestro: 0, amex: 0, visapay: 0 };
+    const codeMap = { "AX":"amex", "MA":"maestro", "MC":"mastercard", "VA":"visa", "VP":"visapay" };
+
+    const ref = sheet["!ref"];
+    if (!ref) return totals;
+
+    const range = XLSX.utils.decode_range(ref);
+    const lastRow = range.e.r + 1;
+
+    for (let r = 1; r <= lastRow; r++) {
+      const code = String(readCell(sheet, `C${r}`) || "").trim().toUpperCase();
+      if (!codeMap[code]) continue;
+
+      const amount = parseNumberLoose(readCell(sheet, `J${r}`));
+      if (amount == null) continue;
+
+      let nonEmpty = 0;
+      const colsToCheck = ["A","B","D","E","F","G","H","I","K","L","M","N"];
+      for (const col of colsToCheck) {
+        const v = readCell(sheet, `${col}${r}`);
+        if (v != null && String(v).trim() !== "") nonEmpty++;
+        if (nonEmpty > 1) break;
+      }
+      if (nonEmpty > 1) continue;
+
+      totals[codeMap[code]] += amount;
+    }
+
+    return totals;
+  };
+
+  const buildComparison = (paymentTotals, tillTotals) => {
+    const rows = BRANDS.map(b => {
+      const pp = Number(paymentTotals[b.key] || 0);
+      const tm = Number(tillTotals[b.key] || 0);
+      const diff = tm - pp;
+      return { brand: b.label, key: b.key, payment: pp, till: tm, diff };
+    });
+    const hasDiff = rows.some(r => Math.abs(r.diff) > 0.00001);
+    return { rows, hasDiff };
+  };
+
+  const renderTable = (rows) => {
+    const hasDiff = rows.some(r => Math.abs(r.diff) > 0.00001);
+    const diffRows = rows.filter(r => Math.abs(r.diff) > 0.00001);
+
+    els.tableArea.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Karte</th>
+            <th class="num">Payment Planet</th>
+            <th class="num">Till Movement’s</th>
+            <th class="num">Differenz</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr>
+              <td>${r.brand}</td>
+              <td class="num">${fmtEUR(r.payment)}</td>
+              <td class="num">${fmtEUR(r.till)}</td>
+              <td class="num" style="color:${Math.abs(r.diff) > 0.00001 ? 'var(--danger)' : 'rgba(232,238,249,.92)'};">
+                ${fmtEUR(r.diff)}
+              </td>
+            </tr>
+          `).join("")}
+          <tr>
+            <td style="font-weight:750;">Summe</td>
+            <td class="num" style="font-weight:750;">${fmtEUR(rows.reduce((a,r)=>a+r.payment,0))}</td>
+            <td class="num" style="font-weight:750;">${fmtEUR(rows.reduce((a,r)=>a+r.till,0))}</td>
+            <td class="num" style="font-weight:800; color:${hasDiff ? 'var(--danger)' : 'var(--ok)'};">
+              ${fmtEUR(rows.reduce((a,r)=>a+r.diff,0))}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="mini" style="margin-top:10px;">
+        ${hasDiff
+          ? `<b style="color:var(--danger);">Differenzen gefunden:</b> ${diffRows.map(d => d.brand).join(", ")}`
+          : `<b style="color:var(--ok);">Keine Differenzen.</b> Alles kompatibel.`}
+      </div>
+    `;
+  };
+
+  const buildDifferencesOnlyTableText = (rows) => {
+    const diffs = rows.filter(r => Math.abs(r.diff) > 0.00001);
+    if (diffs.length === 0) return "Keine Differenzen.";
+
+    const lines = [];
+    lines.push("Karte | Differenz");
+    lines.push("----- | --------");
+    for (const r of diffs) lines.push(`${r.brand} | ${fmtEUR(r.diff)}`);
+    return lines.join("\n");
+  };
+
+  // ✅ UPDATED: receptor fixo no mailto
+  const createEmail = (rows) => {
+    const dateDE = getYesterdayDE();
+    const subject = `Tagesabschluss - Differenz (${dateDE})`;
+    const diffTable = buildDifferencesOnlyTableText(rows);
+
+    const body =
+`Hallo Alexa
+
+Anbei sind die Differenzen vom ${dateDE}
+
+${diffTable}
+
+
+LG
+
+Higor Conceicao
+`;
+
+    const to = "alexa.bistricky@radissonindividuals.com";
+    const mailto =
+      `mailto:${encodeURIComponent(to)}` +
+      `?subject=${encodeURIComponent(subject)}` +
+      `&body=${encodeURIComponent(body)}`;
+
+    return { subject, body, mailto, to };
+  };
+
+  const makeTagesabschlussHARBRWorkbook = (rows) => {
+    const order = ["mastercard", "visa", "amex", "maestro", "visapay"];
+    const byKey = (k) => rows.find(r => r.key === k) || { payment:0, till:0, diff:0 };
+    const till = order.map(k => Number(byKey(k).till || 0));
+    const pay  = order.map(k => Number(byKey(k).payment || 0));
+    const dif  = order.map(k => Number(byKey(k).diff || 0));
+
+    const title = "Tagesabschluss HARBR";
+    const dateDE = getYesterdayDE();
+
+    const wb = XLSX.utils.book_new();
+    const ws = {};
+
+    const set = (addr, v, s, f) => {
+      ws[addr] = ws[addr] || {};
+      if (f) ws[addr].f = f;
+      if (v !== undefined) ws[addr].v = v;
+      if (!ws[addr].t) {
+        if (typeof v === "number") ws[addr].t = "n";
+        else ws[addr].t = "s";
+      }
+      if (s) ws[addr].s = s;
+    };
+
+    const blueTitle = {
+      font: { name: "Calibri", sz: 24, bold: true, color: { rgb: "1D4ED8" } },
+      alignment: { horizontal: "center", vertical: "center" }
+    };
+    const center = { alignment: { horizontal: "center", vertical: "center" } };
+    const head = {
+      font: { bold: true },
+      alignment: { horizontal: "center", vertical: "center", wrapText: true },
+      fill: { patternType: "solid", fgColor: { rgb: "E2E8F0" } },
+      border: {
+        top:{style:"thin",color:{rgb:"CBD5E1"}}, bottom:{style:"thin",color:{rgb:"CBD5E1"}},
+        left:{style:"thin",color:{rgb:"CBD5E1"}}, right:{style:"thin",color:{rgb:"CBD5E1"}}
+      }
+    };
+    const sideHead = {
+      font: { bold: true },
+      alignment: { horizontal: "left", vertical: "center" },
+      fill: { patternType: "solid", fgColor: { rgb: "F1F5F9" } },
+      border: {
+        top:{style:"thin",color:{rgb:"CBD5E1"}}, bottom:{style:"thin",color:{rgb:"CBD5E1"}},
+        left:{style:"thin",color:{rgb:"CBD5E1"}}, right:{style:"thin",color:{rgb:"CBD5E1"}}
+      }
+    };
+    const cellN = {
+      numFmt: '#,##0.00',
+      alignment: { horizontal: "right", vertical: "center" },
+      border: {
+        top:{style:"thin",color:{rgb:"CBD5E1"}}, bottom:{style:"thin",color:{rgb:"CBD5E1"}},
+        left:{style:"thin",color:{rgb:"CBD5E1"}}, right:{style:"thin",color:{rgb:"CBD5E1"}}
+      }
+    };
+    const cellB = {
+      alignment: { horizontal: "left", vertical: "center" },
+      border: {
+        top:{style:"thin",color:{rgb:"CBD5E1"}}, bottom:{style:"thin",color:{rgb:"CBD5E1"}},
+        left:{style:"thin",color:{rgb:"CBD5E1"}}, right:{style:"thin",color:{rgb:"CBD5E1"}}
+      }
+    };
+    const noteHead = {
+      font: { bold: true },
+      alignment: { horizontal: "left", vertical: "center" },
+      fill: { patternType: "solid", fgColor: { rgb: "E2E8F0" } }
+    };
+
+    set("A1", title, blueTitle);
+    set("A2", dateDE, { ...center, font:{ bold:true } });
+
+    set("A3", "", head);
+    set("B3", "Mastercard", head);
+    set("C3", "Visa", head);
+    set("D3", "Amex", head);
+    set("E3", "Maestro", head);
+    set("F3", "Visa Pay", head);
+    set("G3", "Gesamt", head);
+    set("H3", "Bank Transfers", head);
+
+    set("A4", "Till Movement", sideHead);
+    set("A5", "3C Payment", sideHead);
+    set("A6", "Differenz", sideHead);
+    set("A7", "Korrektur", sideHead);
+
+    const fillRow = (r, vals) => {
+      const cols = ["B","C","D","E","F"];
+      cols.forEach((col, idx) => set(`${col}${r}`, vals[idx], cellN));
+      set(`G${r}`, undefined, cellN, `SUM(B${r}:F${r})`);
+      set(`H${r}`, "", cellB);
+    };
+
+    fillRow(4, till);
+    fillRow(5, pay);
+    fillRow(6, dif);
+
+    ["B","C","D","E","F"].forEach(col => set(`${col}7`, "", cellB));
+    set("G7", undefined, cellN, "SUM(B7:F7)");
+    set("H7", "", cellB);
+
+    set("A9", "Summe Tagesabschluss Fiori", { ...sideHead, font:{ bold:true } });
+    ["B","C","D","E","F"].forEach(col => set(`${col}9`, "", sideHead));
+    set("G9", undefined, { ...cellN, font:{ bold:true } }, "SUM(G4:G6)");
+    set("H9", "", cellB);
+
+    set("F10", "Differenz", { ...head, alignment:{ horizontal:"center", vertical:"center" } });
+    ["A","B","C","D","E","H"].forEach(col => set(`${col}10`, "", cellB));
+    set("G10", undefined, { ...cellN, font:{ bold:true } }, "G6-G9");
+
+    set("A12", "Notizen des Tages", noteHead);
+    for (let r = 13; r <= 18; r++) set(`A${r}`, "", cellB);
+
+    ws["!merges"] = [
+      { s:{r:0,c:0}, e:{r:0,c:7} },
+      { s:{r:1,c:0}, e:{r:1,c:7} },
+      { s:{r:8,c:0}, e:{r:8,c:5} },
+      { s:{r:11,c:0}, e:{r:11,c:7} },
+      { s:{r:12,c:0}, e:{r:17,c:7} },
+    ];
+
+    ws["!cols"] = [
+      { wch: 26 }, // A
+      { wch: 14 }, // B
+      { wch: 12 }, // C
+      { wch: 12 }, // D
+      { wch: 12 }, // E
+      { wch: 12 }, // F
+      { wch: 14 }, // G
+      { wch: 16 }, // H
+    ];
+
+    ws["!ref"] = "A1:H18";
+    XLSX.utils.book_append_sheet(wb, ws, "Tagesabschluss");
+    return wb;
+  };
+
+  const downloadWorkbook = (wb, filename) => {
+    XLSX.writeFile(wb, filename);
+  };
+
+  const humanFileSize = (bytes) => {
+    if (!bytes && bytes !== 0) return "";
+    const units = ["B","KB","MB","GB"];
+    let b = bytes, i = 0;
+    while (b >= 1024 && i < units.length-1) { b /= 1024; i++; }
+    return `${b.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+  };
+
+  const renderAttachments = () => {
+    const items = [
+      { id: "payment", label: "Payment Planet", wb: wbPayment, fileEl: els.filePayment, sheetEl: els.sheetPayment },
+      { id: "till", label: "Till Movement’s", wb: wbTill, fileEl: els.fileTill, sheetEl: els.sheetTill },
+    ];
+
+    els.attachmentsArea.innerHTML = items.map(item => {
+      const file = item.fileEl.files?.[0];
+      const has = !!file && !!item.wb;
+
+      if (!has) {
+        return `
+          <div class="attach-card">
+            <div class="attach-left">
+              <div class="attach-name">${item.label}</div>
+              <div class="attach-meta">Keine Datei geladen.</div>
+            </div>
+            <div class="attach-actions">
+              <button class="secondary" disabled>Vorschau</button>
+              <button class="secondary" disabled>Entfernen</button>
+            </div>
+          </div>
+        `;
+      }
+
+      const sheetName = item.sheetEl.value || item.wb.SheetNames[0];
+
+      return `
+        <div class="attach-card">
+          <div class="attach-left">
+            <div class="attach-name">${file.name}</div>
+            <div class="attach-meta">${item.label} · ${humanFileSize(file.size)} · Sheet: <b>${sheetName}</b></div>
+          </div>
+          <div class="attach-actions">
+            <button class="secondary" data-action="preview" data-id="${item.id}">Vorschau</button>
+            <button class="secondary" data-action="remove" data-id="${item.id}">Entfernen</button>
+          </div>
+        </div>
+        <div class="preview-box" id="preview_${item.id}" style="display:none;"></div>
+      `;
+    }).join("");
+
+    els.attachmentsArea.querySelectorAll("button[data-action]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const action = btn.getAttribute("data-action");
+        const id = btn.getAttribute("data-id");
+        if (action === "remove") removeAttachment(id);
+        if (action === "preview") togglePreview(id);
+      });
+    });
+  };
+
+  const removeAttachment = (id) => {
+    if (id === "payment") {
+      wbPayment = null;
+      els.filePayment.value = "";
+      els.sheetPayment.innerHTML = "";
+      els.sheetPayment.disabled = true;
+    }
+    if (id === "till") {
+      wbTill = null;
+      els.fileTill.value = "";
+      els.sheetTill.innerHTML = "";
+      els.sheetTill.disabled = true;
+    }
+
+    lastComparison = null;
+    els.tableArea.innerHTML = "";
+    els.emailPreview.textContent = "Noch keine E-Mail erstellt.";
+    els.btnDownloadExcel.disabled = true;
+    els.btnCreateEmail.disabled = true;
+    els.btnOpenMailto.disabled = true;
+
+    enableCompareIfReady();
+    setStatus("", "Anhang entfernt");
+    renderAttachments();
+  };
+
+  const togglePreview = (id) => {
+    const box = document.getElementById(`preview_${id}`);
+    if (!box) return;
+
+    const isOpen = box.style.display !== "none";
+    if (isOpen) {
+      box.style.display = "none";
+      box.innerHTML = "";
+      return;
+    }
+
+    ["payment","till"].forEach(x => {
+      const b = document.getElementById(`preview_${x}`);
+      if (b) { b.style.display = "none"; b.innerHTML = ""; }
+    });
+
+    const item = (id === "payment")
+      ? { wb: wbPayment, sheetName: els.sheetPayment.value || (wbPayment?.SheetNames?.[0] || "") }
+      : { wb: wbTill, sheetName: els.sheetTill.value || (wbTill?.SheetNames?.[0] || "") };
+
+    if (!item.wb || !item.sheetName) return;
+
+    const sh = item.wb.Sheets[item.sheetName];
+    const matrix = sheetToMatrix(sh);
+
+    const maxRows = Math.min(25, matrix.length);
+    const maxCols = Math.min(10, Math.max(...matrix.slice(0, maxRows).map(r => r.length), 0));
+
+    const head = [];
+    for (let c = 0; c < maxCols; c++) head.push(`Spalte ${c+1}`);
+
+    const rows = [];
+    for (let r = 0; r < maxRows; r++) {
+      const row = [];
+      for (let c = 0; c < maxCols; c++) row.push(matrix[r]?.[c] ?? "");
+      rows.push(row);
+    }
+
+    box.innerHTML = `
+      <div style="padding:10px 12px; border-bottom: 1px solid rgba(148,163,184,.14); color: rgba(148,163,184,.95); font-size:12px;">
+        Vorschau: <b>${item.sheetName}</b> · zeigt ${maxRows} Zeilen × ${maxCols} Spalten
+      </div>
+      <table>
+        <thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead>
+        <tbody>
+          ${rows.map(r => `<tr>${r.map(v => `<td>${String(v)}</td>`).join("")}</tr>`).join("")}
+        </tbody>
+      </table>
+    `;
+    box.style.display = "block";
+  };
+
+  const loadWorkbookFromFile = async (file) => {
+    const data = await file.arrayBuffer();
+    return XLSX.read(data, { type: "array" });
+  };
+
+  const fillSheetSelect = (selectEl, wb) => {
+    selectEl.innerHTML = "";
+    wb.SheetNames.forEach((name, idx) => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      if (idx === 0) opt.selected = true;
+      selectEl.appendChild(opt);
+    });
+    selectEl.disabled = false;
+  };
+
+  const enableCompareIfReady = () => {
+    const ready = wbPayment && wbTill;
+    els.btnCompare.disabled = !ready;
+    if (ready) setStatus("ok", "Dateien geladen");
+    if (!ready) setStatus("", "Bereit");
+  };
+
+  els.filePayment.addEventListener("change", async (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setStatus("", "Lade Payment Planet…");
+    wbPayment = await loadWorkbookFromFile(f);
+    fillSheetSelect(els.sheetPayment, wbPayment);
+    enableCompareIfReady();
+    renderAttachments();
+  });
+
+  els.fileTill.addEventListener("change", async (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setStatus("", "Lade Till Movement’s…");
+    wbTill = await loadWorkbookFromFile(f);
+    fillSheetSelect(els.sheetTill, wbTill);
+    enableCompareIfReady();
+    renderAttachments();
+  });
+
+  els.sheetPayment.addEventListener("change", renderAttachments);
+  els.sheetTill.addEventListener("change", renderAttachments);
+
+  els.btnCompare.addEventListener("click", () => {
+    try {
+      const shPP = getSheetByNameOrFallback(wbPayment, "Sheet1", els.sheetPayment);
+      const shTM = getSheetByNameOrFallback(wbTill, "Format", els.sheetTill);
+
+      const ppTotals = paymentPlanetTotalsFixed(shPP);
+      const tmTotals = tillMovementsTotalsFixed(shTM);
+
+      const { rows, hasDiff } = buildComparison(ppTotals, tmTotals);
+      lastComparison = { rows, hasDiff, email: null, workbook: null };
+
+      renderTable(rows);
+
+      els.btnDownloadExcel.disabled = false;
+      els.btnCreateEmail.disabled = !hasDiff;
+      els.btnOpenMailto.disabled = true;
+
+      if (hasDiff) setStatus("danger", "Differenzen gefunden");
+      else setStatus("ok", "Alles kompatibel");
+
+      els.emailPreview.textContent = "Noch keine E-Mail erstellt.";
+    } catch (err) {
+      console.error(err);
+      setStatus("danger", "Fehler beim Vergleichen");
+      alert("Fehler beim Vergleichen. Prüfe die Dateien/Sheets (Payment: Sheet1, Till: Format).");
+    }
+  });
+
+  // ✅ downloads in custom layout + custom filename
+  els.btnDownloadExcel.addEventListener("click", () => {
+    if (!lastComparison) return;
+    const dateDE = getYesterdayDE();
+    const wb = makeTagesabschlussHARBRWorkbook(lastComparison.rows);
+    lastComparison.workbook = wb;
+    downloadWorkbook(wb, `Tagesabschluss HARBR (${dateDE}).xlsx`);
+  });
+
+  els.btnCreateEmail.addEventListener("click", () => {
+    if (!lastComparison) return;
+    const { subject, body, mailto } = createEmail(lastComparison.rows);
+    lastComparison.email = { subject, body, mailto };
+
+    els.emailPreview.textContent =
+`Betreff: ${subject}
+
+An: ${lastComparison.email.to}
+
+${body}`;
+
+    els.btnOpenMailto.disabled = false;
+    setStatus("danger", "E-Mail bereit");
+  });
+
+  els.btnOpenMailto.addEventListener("click", () => {
+    if (!lastComparison?.email) return;
+    window.location.href = lastComparison.email.mailto;
+  });
+
+  setStatus("", "Bereit");
+  renderAttachments();
+})();
+</script>
+</body>
+</html>
